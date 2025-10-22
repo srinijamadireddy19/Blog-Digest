@@ -4,13 +4,15 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 
-CORS(app, resources={r"/api/*": {"origins": app.config["FRONTEND_URL"]}})
+app.config.from_object(Config)
+
+CORS(app, resources={r"/*": {"origins": app.config.get("FRONTEND_URL", "*")}})
 
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
 
-@app.route("/api/process", methods=["POST"])
+@app.route("/process", methods=["POST"])
 def process_text():
     data = request.get_json()
     user_text = data.get("text", "")
