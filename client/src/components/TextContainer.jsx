@@ -10,6 +10,34 @@ export default function BlogDigestInput() {
 
   const navigate = useNavigate();
 
+  const sendDataToBackend = async (selectedOption = 'summary') => {
+      const formData = new FormData();
+
+      if (activeTab === 'picture' && selectedFile) {
+        formData.append('file', selectedFile);
+      } else {
+        formData.append('inputValue', inputValue);
+        formData.append('type', activeTab); // 'link' or 'text'
+      }
+
+      formData.append('action', selectedOption); // e.g., summary, pdf, keywords
+
+      try {
+        const response = await fetch('http://localhost:5000/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await response.json();
+        console.log('Backend response:', result);
+        // Optionally navigate after successful response
+        navigate('/summary', { state: result });
+      } catch (error) {
+        console.error('Error sending data:', error);
+      }
+    };
+
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -36,7 +64,7 @@ export default function BlogDigestInput() {
     }
   };
 
-  const navigateToOutput = (tab = 'summary') => {
+  /*const navigateToOutput = (tab = 'summary') => {
     // Require at least one input type before navigating
     const hasInput = Boolean(
       (activeTab === 'picture' && selectedFile) ||
@@ -55,9 +83,40 @@ export default function BlogDigestInput() {
     } else {
       navigate('/summary', { state: { source: activeTab, input: inputValue, selectedOption: tab } });
     }
-  };
+  };*/
 
-  const handleSubmit = () => navigateToOutput('summary');
+  const handleSubmit = () => {
+  // Require at least one input type
+  const hasInput = Boolean(
+    (activeTab === 'picture' && selectedFile) ||
+    (activeTab !== 'picture' && inputValue && inputValue.trim())
+  );
+
+  if (!hasInput) {
+    setShowInputRequired(true);
+    return;
+  }
+
+  setShowInputRequired(false);
+
+  sendDataToBackend('summary'); // Send form data to Flask
+};
+
+const navigateToOutput = (tab = 'summary') => {
+  const hasInput = Boolean(
+    (activeTab === 'picture' && selectedFile) ||
+    (activeTab !== 'picture' && inputValue && inputValue.trim())
+  );
+
+  if (!hasInput) {
+    setShowInputRequired(true);
+    return;
+  }
+
+  setShowInputRequired(false);
+  sendDataToBackend(tab);
+};
+
 
   // clear the error when user starts typing or selects a file
   useEffect(() => {
