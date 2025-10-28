@@ -23,7 +23,7 @@ export default function BlogDigestInput() {
       formData.append('action', selectedOption); // e.g., summary, pdf, keywords
 
       try {
-        const response = await fetch('http://localhost:5000/upload', {
+        const response = await fetch('http://localhost:5000/process', {
           method: 'POST',
           body: formData,
         });
@@ -363,7 +363,7 @@ const navigateToOutput = (tab = 'summary') => {
       </div>
 
       {/* Custom Animations */}
-      <style jsx>{`
+      <style >{`
         @keyframes fade-in {
           from {
             opacity: 0;
